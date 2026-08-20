@@ -94,7 +94,12 @@ class ProjectScreen extends StatelessWidget {
       );
       return;
     }
-    await exportService.exportAndShare(project);
+    // iPad requires the share sheet to be anchored to a screen position
+    // (it's presented as a popover) - derive one from the tapped button so
+    // sharing doesn't silently no-op there.
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+    await exportService.exportAndShare(project, sharePositionOrigin: origin);
   }
 
   @override
@@ -108,10 +113,12 @@ class ProjectScreen extends StatelessWidget {
             actions: [
               Icon(project.synced ? Icons.cloud_done : Icons.cloud_off),
               const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.ios_share),
-                tooltip: 'Export CSV',
-                onPressed: () => _export(context),
+              Builder(
+                builder: (buttonContext) => IconButton(
+                  icon: const Icon(Icons.ios_share),
+                  tooltip: 'Export CSV',
+                  onPressed: () => _export(buttonContext),
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.save),

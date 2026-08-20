@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' show Rect;
 
 import 'package:csv/csv.dart';
 import 'package:path/path.dart' as p;
@@ -94,11 +95,16 @@ class CsvExportService {
     return file.writeAsString(csv);
   }
 
-  Future<void> exportAndShare(Project project) async {
+  /// [sharePositionOrigin] anchors the share sheet on screen. iPadOS
+  /// requires this (it presents the sheet as a popover pointing at that
+  /// rect) - without it, sharing silently does nothing on iPad specifically,
+  /// even though iPhone and Android don't need it.
+  Future<void> exportAndShare(Project project, {Rect? sharePositionOrigin}) async {
     final file = await writeToTempFile(project);
     await Share.shareXFiles(
       [XFile(file.path)],
       subject: 'Survey export - ${project.siteRef}',
+      sharePositionOrigin: sharePositionOrigin,
     );
   }
 }
