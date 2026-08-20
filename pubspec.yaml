@@ -1,0 +1,50 @@
+name: building_survey_app
+description: "Building condition survey app."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # state management
+  provider: ^6.1.2
+
+  # ids, csv, sharing, files
+  uuid: ^4.5.1
+  csv: ^6.0.0
+  share_plus: ^10.1.4
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+  # camera capture
+  image_picker: ^1.1.2
+
+  # connectivity for offline-first sync
+  connectivity_plus: ^6.1.0
+
+  # what3words location lookup
+  http: ^1.2.2
+
+  # cloud sync backend
+  firebase_core: ^3.8.0
+  cloud_firestore: ^5.5.0
+  firebase_storage: ^12.3.7
+  firebase_auth: ^5.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/data/hierarchy.json

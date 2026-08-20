@@ -1,0 +1,41 @@
+workflows:
+  ios-workflow:
+    name: Building Survey - iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      groups:
+        - ios_signing # create this group in Codemagic UI (see README) and
+          # add your certificate / provisioning profile there
+      vars:
+        WHAT3WORDS_API_KEY: 0QHNYNM8
+        BUNDLE_ID: "com.Eddisons.buildingsurvey"
+    scripts:
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_ADHOC \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build ipa (ad-hoc, for sideloading)
+        script: |
+          flutter build ipa --release \
+            --dart-define=WHAT3WORDS_API_KEY=$WHAT3WORDS_API_KEY \
+            --export-options-plist=$HOME/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com # <- put your own email here to get notified
+        notify:
+          success: true
+          failure: true

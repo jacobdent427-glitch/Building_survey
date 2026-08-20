@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "350618114485",
+    "project_id": "building-surveying-app",
+    "storage_bucket": "building-surveying-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:350618114485:android:4b9678780ad18f465861fc",
+        "android_client_info": {
+          "package_name": "com.Eddisons.building_survey"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAblAYu139bJDS5Ay8PMmtap4f5nVvrABo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
