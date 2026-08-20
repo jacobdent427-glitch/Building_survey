@@ -5,6 +5,7 @@ import '../models/building.dart';
 import '../models/room.dart';
 import '../services/what3words_service.dart';
 import '../state/project_controller.dart';
+import '../widgets/empty_state.dart';
 import 'room_screen.dart';
 
 /// Shows the rooms within a building. The surveyor adds a room reference,
@@ -128,8 +129,12 @@ class BuildingScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(title: Text(building.reference)),
           body: building.rooms.isEmpty
-              ? const Center(child: Text('No rooms yet - add one below'))
+              ? const EmptyState(
+                  icon: Icons.meeting_room_rounded,
+                  message: 'No rooms yet\nAdd one to start recording components',
+                )
               : ListView.builder(
+                  padding: const EdgeInsets.only(top: 8, bottom: 96),
                   itemCount: building.rooms.length,
                   itemBuilder: (context, index) {
                     final Room room = building.rooms[index];
@@ -138,12 +143,17 @@ class BuildingScreen extends StatelessWidget {
                       if (room.what3words.isNotEmpty) room.what3words,
                       '${room.components.length} components',
                     ];
+                    final colors = Theme.of(context).colorScheme;
                     return Card(
                       child: ListTile(
-                        leading: const Icon(Icons.meeting_room),
-                        title: Text(room.reference),
+                        leading: CircleAvatar(
+                          backgroundColor: colors.secondaryContainer,
+                          child: Icon(Icons.meeting_room_rounded, color: colors.onSecondaryContainer),
+                        ),
+                        title: Text(room.reference, style: const TextStyle(fontWeight: FontWeight.w600)),
                         subtitle: Text(subtitleParts.join(' · ')),
                         trailing: PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert_rounded),
                           onSelected: (value) {
                             if (value == 'edit') {
                               _addOrEditRoom(context, existing: room);
@@ -165,7 +175,7 @@ class BuildingScreen extends StatelessWidget {
                 ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _addOrEditRoom(context),
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_rounded),
             label: const Text('Add Room'),
           ),
         );

@@ -52,60 +52,131 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Building Survey')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
           children: [
-            Text('Surveyor ID', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(Icons.domain_verification_rounded, color: colors.onPrimaryContainer, size: 34),
+            ),
+            const SizedBox(height: 20),
+            Text('Building Survey', style: Theme.of(context).textTheme.headlineMedium
+                ?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text('Sign in with your surveyor ID to begin',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
+            const SizedBox(height: 28),
             TextField(
               controller: _surveyorIdController,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+                labelText: 'Surveyor ID',
                 hintText: 'e.g. JD-102',
+                prefixIcon: Icon(Icons.badge_outlined),
               ),
               onChanged: (_) => setState(() {}),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: _canContinue ? _startNewProject : null,
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add_rounded),
               label: const Text('New Project'),
             ),
-            const SizedBox(height: 24),
-            Text('Existing projects on this device',
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _existingProjects.isEmpty
-                      ? const Center(child: Text('No saved projects yet'))
-                      : ListView.builder(
-                          itemCount: _existingProjects.length,
-                          itemBuilder: (context, index) {
-                            final project = _existingProjects[index];
-                            return Card(
-                              child: ListTile(
-                                title: Text(project.siteRef),
-                                subtitle: Text(
-                                    '${project.siteAddress}\n${project.componentCount} components'),
-                                isThreeLine: true,
-                                trailing: Icon(
-                                  project.synced ? Icons.cloud_done : Icons.cloud_off,
-                                  color: project.synced ? Colors.green : Colors.grey,
-                                ),
-                                enabled: _canContinue,
-                                onTap: _canContinue ? () => _openProject(project) : null,
-                              ),
-                            );
-                          },
-                        ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Text('Saved projects',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(width: 8),
+                if (_existingProjects.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: colors.secondaryContainer,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text('${_existingProjects.length}',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w700, color: colors.onSecondaryContainer)),
+                  ),
+              ],
             ),
+            const SizedBox(height: 12),
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_existingProjects.isEmpty)
+              _EmptyProjectsHint(colors: colors)
+            else
+              ..._existingProjects.map((project) => _ProjectTile(
+                    project: project,
+                    enabled: _canContinue,
+                    onTap: () => _openProject(project),
+                  )),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyProjectsHint extends StatelessWidget {
+  final ColorScheme colors;
+  const _EmptyProjectsHint({required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 28),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.folder_open_rounded, size: 32, color: colors.onSurfaceVariant),
+          const SizedBox(height: 8),
+          Text('No saved projects yet', style: TextStyle(color: colors.onSurfaceVariant)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProjectTile extends StatelessWidget {
+  final Project project;
+  final bool enabled;
+  final VoidCallback onTap;
+  const _ProjectTile({required this.project, required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        onTap: enabled ? onTap : null,
+        enabled: enabled,
+        leading: CircleAvatar(
+          backgroundColor: colors.primaryContainer,
+          child: Icon(Icons.apartment_rounded, color: colors.onPrimaryContainer),
+        ),
+        title: Text(project.siteRef, style: const TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text('${project.siteAddress}\n${project.componentCount} components recorded'),
+        isThreeLine: true,
+        trailing: Icon(
+          project.synced ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+          color: project.synced ? const Color(0xFF2E7D32) : colors.onSurfaceVariant,
         ),
       ),
     );

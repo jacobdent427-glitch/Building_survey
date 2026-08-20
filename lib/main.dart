@@ -12,6 +12,7 @@ import 'services/sync_service.dart';
 import 'services/what3words_service.dart';
 import 'state/project_controller.dart';
 import 'screens/surveyor_entry_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,10 +67,7 @@ class BuildingSurveyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Building Survey',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.light(),
         home: const SurveyorEntryScreen(),
       ),
     );

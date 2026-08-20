@@ -38,38 +38,47 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('New Project')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _siteRefController,
-              decoration: const InputDecoration(
-                labelText: 'Site reference / ID',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (_) => setState(() {}),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Text('Site details',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Text('Surveyor: ${widget.surveyorId}',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          const SizedBox(height: 20),
+          TextField(
+            controller: _siteRefController,
+            decoration: const InputDecoration(
+              labelText: 'Site reference / ID',
+              prefixIcon: Icon(Icons.tag_rounded),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _siteAddressController,
-              decoration: const InputDecoration(
-                labelText: 'Site address',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _siteAddressController,
+            decoration: const InputDecoration(
+              labelText: 'Site address',
+              prefixIcon: Icon(Icons.place_outlined),
             ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _canCreate ? _create : null,
-              child: _creating
-                  ? const SizedBox(
-                      height: 20, width: 20, child: CircularProgressIndicator())
-                  : const Text('Create Project'),
-            ),
-          ],
-        ),
+            maxLines: 2,
+          ),
+          const SizedBox(height: 24),
+          FilledButton(
+            onPressed: _canCreate ? _create : null,
+            child: _creating
+                ? const SizedBox(
+                    height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Text('Create Project'),
+          ),
+        ],
       ),
     );
   }

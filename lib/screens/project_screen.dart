@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../models/building.dart';
 import '../services/csv_export_service.dart';
 import '../state/project_controller.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/sync_status_badge.dart';
 import 'building_screen.dart';
 
 /// Shows the buildings within the open project. From here the surveyor adds
@@ -31,7 +33,9 @@ class ProjectScreen extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'Building reference'),
                 onChanged: (_) => setState(() {}),
               ),
+              const SizedBox(height: 4),
               SwitchListTile(
+                contentPadding: EdgeInsets.zero,
                 title: const Text('External (outside any building)'),
                 value: isExternal,
                 onChanged: (v) => setState(() => isExternal = v),
@@ -111,37 +115,49 @@ class ProjectScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(project.siteRef),
             actions: [
-              Icon(project.synced ? Icons.cloud_done : Icons.cloud_off),
-              const SizedBox(width: 8),
+              SyncStatusBadge(synced: project.synced),
               Builder(
                 builder: (buttonContext) => IconButton(
-                  icon: const Icon(Icons.ios_share),
+                  icon: const Icon(Icons.ios_share_rounded),
                   tooltip: 'Export CSV',
                   onPressed: () => _export(buttonContext),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.save),
+                icon: const Icon(Icons.save_outlined),
                 tooltip: 'Save',
                 onPressed: () => controller.saveNow(),
               ),
+              const SizedBox(width: 4),
             ],
           ),
           body: project.buildings.isEmpty
-              ? const Center(child: Text('No buildings yet - add one below'))
+              ? const EmptyState(
+                  icon: Icons.apartment_rounded,
+                  message: 'No buildings yet\nAdd one to start surveying',
+                )
               : ListView.builder(
+                  padding: const EdgeInsets.only(top: 8, bottom: 96),
                   itemCount: project.buildings.length,
                   itemBuilder: (context, index) {
                     final Building building = project.buildings[index];
                     final roomCount = building.rooms.length;
                     final componentCount =
                         building.rooms.fold(0, (s, r) => s + r.components.length);
+                    final colors = Theme.of(context).colorScheme;
                     return Card(
                       child: ListTile(
-                        leading: Icon(building.isExternal ? Icons.park : Icons.apartment),
-                        title: Text(building.reference),
-                        subtitle: Text('$roomCount rooms, $componentCount components'),
+                        leading: CircleAvatar(
+                          backgroundColor: colors.primaryContainer,
+                          child: Icon(
+                            building.isExternal ? Icons.park_rounded : Icons.apartment_rounded,
+                            color: colors.onPrimaryContainer,
+                          ),
+                        ),
+                        title: Text(building.reference, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: Text('$roomCount ${roomCount == 1 ? 'room' : 'rooms'} · $componentCount components'),
                         trailing: PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert_rounded),
                           onSelected: (value) {
                             if (value == 'edit') {
                               _addOrEditBuilding(context, existing: building);
@@ -163,7 +179,7 @@ class ProjectScreen extends StatelessWidget {
                 ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _addOrEditBuilding(context),
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_rounded),
             label: const Text('Add Building'),
           ),
         );
