@@ -1,37 +1,29 @@
 workflows:
   ios-workflow:
-    name: Building Survey - iOS
+    name: Building Survey - iOS (unsigned, for Sideloadly)
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
-      groups:
-        - ios_signing # create this group in Codemagic UI (see README) and
-          # add your certificate / provisioning profile there
       vars:
         WHAT3WORDS_API_KEY: 0QHNYNM8
-        BUNDLE_ID: "com.Eddisons.buildingsurvey"
     scripts:
-      - name: Set up code signing
-        script: |
-          keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_ADHOC \
-            --create
-          keychain add-certificates
-          xcode-project use-profiles
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Build ipa (ad-hoc, for sideloading)
+      - name: Build unsigned iOS app
         script: |
-          flutter build ipa --release \
-            --dart-define=WHAT3WORDS_API_KEY=$WHAT3WORDS_API_KEY \
-            --export-options-plist=$HOME/export_options.plist
+          flutter build ios --release --no-codesign \
+            --dart-define=WHAT3WORDS_API_KEY=$WHAT3WORDS_API_KEY
+      - name: Package as an unsigned .ipa
+        script: |
+          mkdir -p build/ios/iphoneos/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
+          cd build/ios/iphoneos
+          zip -r BuildingSurvey-unsigned.ipa Payload
     artifacts:
-      - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
+      - build/ios/iphoneos/BuildingSurvey-unsigned.ipa
     publishing:
       email:
         recipients:

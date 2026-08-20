@@ -113,15 +113,33 @@ Also enable **Anonymous** sign-in under Console > Authentication > Sign-in
 method — it's off by default on a new project, and `AuthService` needs it
 to sign the surveyor's device in.
 
-## iOS (no Mac needed to build or install, but read this first)
+## iOS (no Mac, no paid Apple account, no Xcode)
 
-Apple's iOS toolchain (Xcode, code signing) only runs on macOS — that's an
-Apple restriction with no legitimate workaround, so this machine can't build
-iOS directly. Instead the project is set up to build **in the cloud** via
+Apple's iOS toolchain (Xcode) only runs on macOS — that's an Apple
+restriction with no legitimate workaround, so this machine can't build iOS
+directly. The project builds **in the cloud** via
 [Codemagic](https://codemagic.io) (`codemagic.yaml` at the repo root already
-defines the iOS build) and install onto your iPhone **without Xcode** via
-[Sideloadly](https://sideloadly.io) (Windows-native, installs a built `.ipa`
-over USB).
+defines the build) and installs onto your iPhone via
+[Sideloadly](https://sideloadly.io) (Windows-native, no Mac involved).
+
+The `ios-workflow` build deliberately produces an **unsigned** `.ipa`
+(`flutter build ios --no-codesign`, zipped up manually) rather than trying
+to code-sign in CI. Signing happens afterwards, on your PC, inside
+Sideloadly itself — it can sign and install an app using just your Apple ID
+(the same mechanism AltStore uses), so there's no certificate, no
+provisioning profile, and no Apple Developer Program membership to set up
+anywhere. Just a free Apple ID.
+
+Steps:
+1. Push this repo to GitHub (done) and connect it to Codemagic (done).
+2. Run the `ios-workflow` build in Codemagic — it produces
+   `BuildingSurvey-unsigned.ipa`.
+3. Download that `.ipa`.
+4. Open Sideloadly on this PC, plug in your iPhone via USB, drag the `.ipa`
+   in, and sign in with your Apple ID when Sideloadly asks — it handles
+   signing and installs it directly.
+5. Free Apple ID installs expire after 7 days; re-run step 4 with the same
+   `.ipa` to reinstall (no need to rebuild unless the code changed).
 
 Bundle ID: `com.Eddisons.buildingsurvey`. Firebase for iOS is **not**
 registered yet — `flutterfire configure`, or manually register an iOS app
@@ -129,31 +147,6 @@ for `building-surveying-app` in the Firebase console and drop the resulting
 `GoogleService-Info.plist` into `ios/Runner/`, before cloud sync will work
 on iOS (Android already works today; iOS local-only features — capture,
 CSV export — don't need this at all).
-
-**The one honest caveat**: code-signing an iOS app for CI to build
-automatically works most reliably with a paid Apple Developer Program
-membership ($99/year) — Codemagic can then fetch signing certificates
-programmatically. A completely free Apple ID *can* sign apps, but Apple ties
-that to interactively using Xcode on a real Mac at least once, which
-partially defeats the "no Mac" goal. If you don't want to pay, the
-practical fallback is a one-off session on any Mac (borrowed, a library, or
-an hourly rental like MacinCloud) just to generate a certificate/profile —
-after that, Codemagic can reuse it for every future build.
-
-Steps once you're ready:
-1. Push this repo to GitHub (already done if you're reading this from there).
-2. Create a free Codemagic account, connect it to the repo — it will detect
-   `codemagic.yaml` automatically.
-3. In Codemagic's UI, set up iOS code signing (Team settings > Code signing
-   identities) with either your Developer Program certificate, or one
-   generated via the Mac session above, and put it in a variable group named
-   `ios_signing` (referenced in `codemagic.yaml`).
-4. Run the `ios-workflow` build — it produces a `.ipa` artifact.
-5. Download the `.ipa`, open Sideloadly on this PC, plug in your iPhone,
-   drag the `.ipa` in, sign in with your (free is fine) Apple ID when
-   prompted, and it installs directly.
-6. Free Apple ID installs expire after 7 days and need re-installing via
-   Sideloadly; a paid Developer Program account doesn't have that limit.
 
 ## Known limitations / next steps
 
