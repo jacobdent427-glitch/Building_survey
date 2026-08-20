@@ -16,18 +16,18 @@ class Building {
   }) : rooms = rooms ?? [];
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'reference': reference,
-        'isExternal': isExternal,
-        'rooms': rooms.map((r) => r.toJson()).toList(),
-      };
+    'id': id,
+    'reference': reference,
+    'isExternal': isExternal,
+    'rooms': rooms.map((r) => r.toJson()).toList(),
+  };
 
   factory Building.fromJson(Map<String, dynamic> json) => Building(
-        id: json['id'] as String,
-        reference: json['reference'] as String,
-        isExternal: json['isExternal'] as bool? ?? false,
-        rooms: (json['rooms'] as List)
-            .map((r) => Room.fromJson(r as Map<String, dynamic>))
-            .toList(),
-      );
+    id: json['id'] as String,
+    reference: json['reference'] as String,
+    isExternal: json['isExternal'] as bool? ?? false,
+    rooms: (json['rooms'] as List)
+        .map((r) => Room.fromJson(r as Map<String, dynamic>))
+        .toList(),
+  );
 }

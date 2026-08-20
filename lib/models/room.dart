@@ -18,20 +18,20 @@ class Room {
   }) : components = components ?? [];
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'reference': reference,
-        'floor': floor,
-        'what3words': what3words,
-        'components': components.map((c) => c.toJson()).toList(),
-      };
+    'id': id,
+    'reference': reference,
+    'floor': floor,
+    'what3words': what3words,
+    'components': components.map((c) => c.toJson()).toList(),
+  };
 
   factory Room.fromJson(Map<String, dynamic> json) => Room(
-        id: json['id'] as String,
-        reference: json['reference'] as String,
-        floor: json['floor'] as String? ?? '',
-        what3words: json['what3words'] as String? ?? '',
-        components: (json['components'] as List)
-            .map((c) => SurveyedComponent.fromJson(c as Map<String, dynamic>))
-            .toList(),
-      );
+    id: json['id'] as String,
+    reference: json['reference'] as String,
+    floor: json['floor'] as String? ?? '',
+    what3words: json['what3words'] as String? ?? '',
+    components: (json['components'] as List)
+        .map((c) => SurveyedComponent.fromJson(c as Map<String, dynamic>))
+        .toList(),
+  );
 }

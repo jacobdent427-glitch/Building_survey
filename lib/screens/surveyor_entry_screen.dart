@@ -39,15 +39,19 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
   bool get _canContinue => _surveyorIdController.text.trim().isNotEmpty;
 
   void _startNewProject() {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => NewProjectScreen(surveyorId: _surveyorIdController.text.trim()),
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            NewProjectScreen(surveyorId: _surveyorIdController.text.trim()),
+      ),
+    );
   }
 
   Future<void> _openProject(Project project) async {
     await context.read<ProjectController>().openProject(project);
     if (!mounted) return;
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProjectScreen()));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const ProjectScreen()));
   }
 
   @override
@@ -65,14 +69,24 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
                 color: colors.primaryContainer,
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Icon(Icons.domain_verification_rounded, color: colors.onPrimaryContainer, size: 34),
+              child: Icon(
+                Icons.domain_verification_rounded,
+                color: colors.onPrimaryContainer,
+                size: 34,
+              ),
             ),
             const SizedBox(height: 20),
-            Text('Building Survey', style: Theme.of(context).textTheme.headlineMedium
-                ?.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              'Building Survey',
+              style: Theme.of(context).textTheme.headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 4),
-            Text('Sign in with your surveyor ID to begin',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
+            Text(
+              'Sign in with your surveyor ID to begin',
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: colors.onSurfaceVariant),
+            ),
             const SizedBox(height: 28),
             TextField(
               controller: _surveyorIdController,
@@ -92,19 +106,30 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
             const SizedBox(height: 32),
             Row(
               children: [
-                Text('Saved projects',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  'Saved projects',
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(width: 8),
                 if (_existingProjects.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.secondaryContainer,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text('${_existingProjects.length}',
-                        style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w700, color: colors.onSecondaryContainer)),
+                    child: Text(
+                      '${_existingProjects.length}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: colors.onSecondaryContainer,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -117,11 +142,13 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
             else if (_existingProjects.isEmpty)
               _EmptyProjectsHint(colors: colors)
             else
-              ..._existingProjects.map((project) => _ProjectTile(
-                    project: project,
-                    enabled: _canContinue,
-                    onTap: () => _openProject(project),
-                  )),
+              ..._existingProjects.map(
+                (project) => _ProjectTile(
+                  project: project,
+                  enabled: _canContinue,
+                  onTap: () => _openProject(project),
+                ),
+              ),
           ],
         ),
       ),
@@ -144,9 +171,16 @@ class _EmptyProjectsHint extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(Icons.folder_open_rounded, size: 32, color: colors.onSurfaceVariant),
+          Icon(
+            Icons.folder_open_rounded,
+            size: 32,
+            color: colors.onSurfaceVariant,
+          ),
           const SizedBox(height: 8),
-          Text('No saved projects yet', style: TextStyle(color: colors.onSurfaceVariant)),
+          Text(
+            'No saved projects yet',
+            style: TextStyle(color: colors.onSurfaceVariant),
+          ),
         ],
       ),
     );
@@ -157,7 +191,11 @@ class _ProjectTile extends StatelessWidget {
   final Project project;
   final bool enabled;
   final VoidCallback onTap;
-  const _ProjectTile({required this.project, required this.enabled, required this.onTap});
+  const _ProjectTile({
+    required this.project,
+    required this.enabled,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -169,14 +207,24 @@ class _ProjectTile extends StatelessWidget {
         enabled: enabled,
         leading: CircleAvatar(
           backgroundColor: colors.primaryContainer,
-          child: Icon(Icons.apartment_rounded, color: colors.onPrimaryContainer),
+          child: Icon(
+            Icons.apartment_rounded,
+            color: colors.onPrimaryContainer,
+          ),
         ),
-        title: Text(project.siteRef, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text('${project.siteAddress}\n${project.componentCount} components recorded'),
+        title: Text(
+          project.siteRef,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          '${project.siteAddress}\n${project.componentCount} components recorded',
+        ),
         isThreeLine: true,
         trailing: Icon(
           project.synced ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
-          color: project.synced ? const Color(0xFF2E7D32) : colors.onSurfaceVariant,
+          color: project.synced
+              ? const Color(0xFF2E7D32)
+              : colors.onSurfaceVariant,
         ),
       ),
     );

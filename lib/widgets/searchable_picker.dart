@@ -11,8 +11,11 @@ Future<String?> showSearchablePicker(
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => _SearchablePickerSheet(title: title, options: options),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) =>
+        _SearchablePickerSheet(title: title, options: options),
   );
 }
 
@@ -34,8 +37,8 @@ class _SearchablePickerSheetState extends State<_SearchablePickerSheet> {
       _filtered = query.isEmpty
           ? widget.options
           : widget.options
-              .where((o) => o.toLowerCase().contains(query.toLowerCase()))
-              .toList();
+                .where((o) => o.toLowerCase().contains(query.toLowerCase()))
+                .toList();
     });
   }
 
@@ -47,11 +50,9 @@ class _SearchablePickerSheetState extends State<_SearchablePickerSheet> {
       minChildSize: 0.5,
       maxChildSize: 0.95,
       expand: false,
-      builder: (context, scrollController) => Container(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
+      builder: (context, scrollController) => Material(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
           child: Column(
@@ -68,8 +69,11 @@ class _SearchablePickerSheetState extends State<_SearchablePickerSheet> {
                   ),
                 ),
               ),
-              Text(widget.title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                widget.title,
+                style: Theme.of(context).textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: _searchController,
@@ -84,11 +88,18 @@ class _SearchablePickerSheetState extends State<_SearchablePickerSheet> {
               Expanded(
                 child: _filtered.isEmpty
                     ? Center(
-                        child: Text('No matches', style: TextStyle(color: colors.onSurfaceVariant)))
+                        child: Text(
+                          'No matches',
+                          style: TextStyle(color: colors.onSurfaceVariant),
+                        ),
+                      )
                     : ListView.separated(
                         controller: scrollController,
                         itemCount: _filtered.length,
-                        separatorBuilder: (_, _) => Divider(height: 1, color: colors.outlineVariant.withValues(alpha: 0.3)),
+                        separatorBuilder: (_, _) => Divider(
+                          height: 1,
+                          color: colors.outlineVariant.withValues(alpha: 0.3),
+                        ),
                         itemBuilder: (context, index) {
                           final option = _filtered[index];
                           return ListTile(

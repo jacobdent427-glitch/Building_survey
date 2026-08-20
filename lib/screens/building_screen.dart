@@ -34,13 +34,17 @@ class BuildingScreen extends StatelessWidget {
               children: [
                 TextField(
                   controller: refController,
-                  decoration: const InputDecoration(labelText: 'Room reference'),
+                  decoration: const InputDecoration(
+                    labelText: 'Room reference',
+                  ),
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: floorController,
-                  decoration: const InputDecoration(labelText: 'Floor (optional)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Floor (optional)',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -55,14 +59,16 @@ class BuildingScreen extends StatelessWidget {
                   },
                 ),
                 if (suggestions.isNotEmpty)
-                  ...suggestions.map((s) => ListTile(
-                        dense: true,
-                        title: Text(s),
-                        onTap: () {
-                          w3wController.text = s;
-                          setState(() => suggestions = []);
-                        },
-                      )),
+                  ...suggestions.map(
+                    (s) => ListTile(
+                      dense: true,
+                      title: Text(s),
+                      onTap: () {
+                        w3wController.text = s;
+                        setState(() => suggestions = []);
+                      },
+                    ),
+                  ),
               ],
             ),
           ),
@@ -106,9 +112,13 @@ class BuildingScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Delete Room?'),
         content: Text(
-            '"${room.reference}" and its ${room.components.length} recorded components will be removed.'),
+          '"${room.reference}" and its ${room.components.length} recorded components will be removed.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(context, true),
@@ -131,7 +141,8 @@ class BuildingScreen extends StatelessWidget {
           body: building.rooms.isEmpty
               ? const EmptyState(
                   icon: Icons.meeting_room_rounded,
-                  message: 'No rooms yet\nAdd one to start recording components',
+                  message:
+                      'No rooms yet\nAdd one to start recording components',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.only(top: 8, bottom: 96),
@@ -148,9 +159,15 @@ class BuildingScreen extends StatelessWidget {
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: colors.secondaryContainer,
-                          child: Icon(Icons.meeting_room_rounded, color: colors.onSecondaryContainer),
+                          child: Icon(
+                            Icons.meeting_room_rounded,
+                            color: colors.onSecondaryContainer,
+                          ),
                         ),
-                        title: Text(room.reference, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        title: Text(
+                          room.reference,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         subtitle: Text(subtitleParts.join(' · ')),
                         trailing: PopupMenuButton<String>(
                           icon: const Icon(Icons.more_vert_rounded),
@@ -163,12 +180,18 @@ class BuildingScreen extends StatelessWidget {
                           },
                           itemBuilder: (context) => const [
                             PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete'),
+                            ),
                           ],
                         ),
-                        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => RoomScreen(building: building, room: room),
-                        )),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                RoomScreen(building: building, room: room),
+                          ),
+                        ),
                       ),
                     );
                   },

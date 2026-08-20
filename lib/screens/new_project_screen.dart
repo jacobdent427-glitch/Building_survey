@@ -24,14 +24,14 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
   Future<void> _create() async {
     setState(() => _creating = true);
     await context.read<ProjectController>().createProject(
-          surveyorId: widget.surveyorId,
-          siteRef: _siteRefController.text.trim(),
-          siteAddress: _siteAddressController.text.trim(),
-        );
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const ProjectScreen()),
+      surveyorId: widget.surveyorId,
+      siteRef: _siteRefController.text.trim(),
+      siteAddress: _siteAddressController.text.trim(),
     );
+    if (!mounted) return;
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const ProjectScreen()));
   }
 
   @override
@@ -41,17 +41,18 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text('Site details',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            'Site details',
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 4),
-          Text('Surveyor: ${widget.surveyorId}',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          Text(
+            'Surveyor: ${widget.surveyorId}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 20),
           TextField(
             controller: _siteRefController,
@@ -75,7 +76,10 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
             onPressed: _canCreate ? _create : null,
             child: _creating
                 ? const SizedBox(
-                    height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : const Text('Create Project'),
           ),
         ],

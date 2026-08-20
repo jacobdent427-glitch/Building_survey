@@ -32,11 +32,9 @@ void main() async {
   final sync = SyncService(localStore, connectivity, auth);
   sync.startAutoRetry();
 
-  runApp(BuildingSurveyApp(
-    hierarchy: hierarchy,
-    localStore: localStore,
-    sync: sync,
-  ));
+  runApp(
+    BuildingSurveyApp(hierarchy: hierarchy, localStore: localStore, sync: sync),
+  );
 }
 
 class BuildingSurveyApp extends StatelessWidget {

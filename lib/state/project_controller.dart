@@ -60,7 +60,11 @@ class ProjectController extends ChangeNotifier {
     return building;
   }
 
-  void updateBuilding(Building building, {required String reference, required bool isExternal}) {
+  void updateBuilding(
+    Building building, {
+    required String reference,
+    required bool isExternal,
+  }) {
     building.reference = isExternal ? 'External' : reference;
     building.isExternal = isExternal;
     _persist();
@@ -79,7 +83,12 @@ class ProjectController extends ChangeNotifier {
     String floor = '',
     String what3words = '',
   }) {
-    final room = Room(id: _uuid.v4(), reference: reference, floor: floor, what3words: what3words);
+    final room = Room(
+      id: _uuid.v4(),
+      reference: reference,
+      floor: floor,
+      what3words: what3words,
+    );
     building.rooms.add(room);
     _persist();
     return room;

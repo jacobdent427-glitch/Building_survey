@@ -20,22 +20,88 @@ class CsvExportService {
   CsvExportService(this._hierarchy);
 
   static const _freqOrder = [
-    'freq_1h', 'freq_2h', 'freq_1d', 'freq_1w', 'freq_2w',
-    'freq_1m', 'freq_2m', 'freq_3m', 'freq_4m', 'freq_6m',
-    'freq_12m', 'freq_13m', 'freq_14m', 'freq_18m', 'freq_24m',
-    'freq_36m', 'freq_48m', 'freq_60m', 'freq_72m', 'freq_84m',
-    'freq_120m', 'freq_10y', 'freq_15y', 'freq_20y', 'freq_25y', 'freq_0u',
+    'freq_1h',
+    'freq_2h',
+    'freq_1d',
+    'freq_1w',
+    'freq_2w',
+    'freq_1m',
+    'freq_2m',
+    'freq_3m',
+    'freq_4m',
+    'freq_6m',
+    'freq_12m',
+    'freq_13m',
+    'freq_14m',
+    'freq_18m',
+    'freq_24m',
+    'freq_36m',
+    'freq_48m',
+    'freq_60m',
+    'freq_72m',
+    'freq_84m',
+    'freq_120m',
+    'freq_10y',
+    'freq_15y',
+    'freq_20y',
+    'freq_25y',
+    'freq_0u',
   ];
 
   static const _header = [
-    'site ref', 'surveyor ref', 'building ref', 'floor', 'room',
-    'photo 1 ref', 'photo 2 ref', 'photo 3 ref',
-    'group', 'system', 'element', 'sub-element', 'component', 'sub component',
-    'qty', 'core/system', 'surveyor condition rating a-d', 'surveyor condition priority 1-4',
-    'RSL', 'SFG Code', 'Unit', 'Rate', 'Pricing Source', 'Statutory / Non-Statutory',
-    'SFG Title', 'Skill Set', 'Annual Timing',
-    '1H', '2H', '1D', '1W', '2W', '1M', '2M', '3M', '4M', '6M', '12M', '13M', '14M',
-    '18M', '24M', '36M', '48M', '60M', '72M', '84M', '120M', '10Y', '15Y', '20Y', '25Y', '0U',
+    'site ref',
+    'surveyor ref',
+    'building ref',
+    'floor',
+    'room',
+    'photo 1 ref',
+    'photo 2 ref',
+    'photo 3 ref',
+    'group',
+    'system',
+    'element',
+    'sub-element',
+    'component',
+    'sub component',
+    'qty',
+    'core/system',
+    'surveyor condition rating a-d',
+    'surveyor condition priority 1-4',
+    'RSL',
+    'SFG Code',
+    'Unit',
+    'Rate',
+    'Pricing Source',
+    'Statutory / Non-Statutory',
+    'SFG Title',
+    'Skill Set',
+    'Annual Timing',
+    '1H',
+    '2H',
+    '1D',
+    '1W',
+    '2W',
+    '1M',
+    '2M',
+    '3M',
+    '4M',
+    '6M',
+    '12M',
+    '13M',
+    '14M',
+    '18M',
+    '24M',
+    '36M',
+    '48M',
+    '60M',
+    '72M',
+    '84M',
+    '120M',
+    '10Y',
+    '15Y',
+    '20Y',
+    '25Y',
+    '0U',
   ];
 
   List<List<dynamic>> buildRows(Project project) {
@@ -64,8 +130,15 @@ class CsvExportService {
             buildingRef,
             room.floor,
             room.reference,
-            photos[0], photos[1], photos[2],
-            c.group, c.system, c.element, c.subElement, c.component, c.subComponent,
+            photos[0],
+            photos[1],
+            photos[2],
+            c.group,
+            c.system,
+            c.element,
+            c.subElement,
+            c.component,
+            c.subComponent,
             c.quantity,
             c.coreSystem.label,
             c.conditionRating.label,
@@ -90,8 +163,16 @@ class CsvExportService {
   Future<File> writeToTempFile(Project project) async {
     final csv = const ListToCsvConverter().convert(buildRows(project));
     final dir = await getTemporaryDirectory();
-    final safeSiteRef = project.siteRef.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
-    final file = File(p.join(dir.path, 'survey_${safeSiteRef}_${project.id.substring(0, 8)}.csv'));
+    final safeSiteRef = project.siteRef.replaceAll(
+      RegExp(r'[^A-Za-z0-9_-]'),
+      '_',
+    );
+    final file = File(
+      p.join(
+        dir.path,
+        'survey_${safeSiteRef}_${project.id.substring(0, 8)}.csv',
+      ),
+    );
     return file.writeAsString(csv);
   }
 
@@ -99,7 +180,10 @@ class CsvExportService {
   /// requires this (it presents the sheet as a popover pointing at that
   /// rect) - without it, sharing silently does nothing on iPad specifically,
   /// even though iPhone and Android don't need it.
-  Future<void> exportAndShare(Project project, {Rect? sharePositionOrigin}) async {
+  Future<void> exportAndShare(
+    Project project, {
+    Rect? sharePositionOrigin,
+  }) async {
     final file = await writeToTempFile(project);
     await Share.shareXFiles(
       [XFile(file.path)],

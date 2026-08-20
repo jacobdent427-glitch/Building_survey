@@ -16,11 +16,16 @@ class PhotoService {
   PhotoService(this._store);
 
   Future<String?> captureForProject(String projectId) async {
-    final shot = await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+    final shot = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+    );
     if (shot == null) return null;
 
     final dir = await _store.photosDir(projectId);
-    final ext = p.extension(shot.path).isNotEmpty ? p.extension(shot.path) : '.jpg';
+    final ext = p.extension(shot.path).isNotEmpty
+        ? p.extension(shot.path)
+        : '.jpg';
     final destPath = p.join(dir.path, '${_uuid.v4()}$ext');
     await File(shot.path).copy(destPath);
     return destPath;

@@ -56,7 +56,9 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
     while (_photoPaths.length < 3) {
       _photoPaths.add(null);
     }
-    _qtyController = TextEditingController(text: (existing?.quantity ?? 1).toString());
+    _qtyController = TextEditingController(
+      text: (existing?.quantity ?? 1).toString(),
+    );
     _coreSystem = existing?.coreSystem;
     _conditionRating = existing?.conditionRating;
     _conditionPriority = existing?.conditionPriority;
@@ -69,7 +71,9 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
       _component = existing.component;
       _subComponent = existing.subComponent;
       try {
-        _resolvedEntry = context.read<HierarchyRepository>().entryByIndex(existing.hierarchyIndex);
+        _resolvedEntry = context.read<HierarchyRepository>().entryByIndex(
+          existing.hierarchyIndex,
+        );
       } catch (_) {
         _resolvedEntry = null;
       }
@@ -104,7 +108,11 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
   }
 
   Future<void> _pick(int levelIndex, String title, List<String> options) async {
-    final selected = await showSearchablePicker(context, title: title, options: options);
+    final selected = await showSearchablePicker(
+      context,
+      title: title,
+      options: options,
+    );
     if (selected == null) return;
     setState(() {
       _resetBelow(levelIndex);
@@ -143,7 +151,13 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
     }
     final hierarchy = context.read<HierarchyRepository>();
     final matches = hierarchy.matchingEntries(
-        _group!, _system!, _element!, _subElement!, _component!, _subComponent!);
+      _group!,
+      _system!,
+      _element!,
+      _subElement!,
+      _component!,
+      _subComponent!,
+    );
 
     if (matches.length == 1) {
       setState(() => _resolvedEntry = matches.first);
@@ -165,8 +179,10 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('This item has more than one database entry - pick the matching one:',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'This item has more than one database entry - pick the matching one:',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 12),
               Expanded(
                 child: ListView.builder(
@@ -176,7 +192,9 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                     final e = matches[index];
                     return ListTile(
                       title: Text('${e.subComponent} (${e.unit})'),
-                      subtitle: Text('SFG ${e.sfgCode} · RSL ${e.rsl} · Rate ${e.rate}'),
+                      subtitle: Text(
+                        'SFG ${e.sfgCode} · RSL ${e.rsl} · Rate ${e.rate}',
+                      ),
                       onTap: () => Navigator.pop(context, e),
                     );
                   },
@@ -204,14 +222,21 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
         radius: 14,
         backgroundColor: done
             ? colors.primary
-            : (enabled ? colors.surfaceContainerHighest : colors.surfaceContainerHighest.withValues(alpha: 0.5)),
+            : (enabled
+                  ? colors.surfaceContainerHighest
+                  : colors.surfaceContainerHighest.withValues(alpha: 0.5)),
         child: done
             ? Icon(Icons.check_rounded, size: 16, color: colors.onPrimary)
-            : Text('$step',
+            : Text(
+                '$step',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: enabled ? colors.onSurfaceVariant : colors.onSurfaceVariant.withValues(alpha: 0.4))),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: enabled
+                      ? colors.onSurfaceVariant
+                      : colors.onSurfaceVariant.withValues(alpha: 0.4),
+                ),
+              ),
       ),
       title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(value ?? 'Not selected'),
@@ -267,7 +292,9 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit Component' : 'Add Component')),
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Edit Component' : 'Add Component'),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -289,15 +316,24 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                               onTap: () => _takePhoto(i),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
+                                  color: colors.surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(12),
                                   image: _photoPaths[i] != null
                                       ? DecorationImage(
-                                          image: FileImage(File(_photoPaths[i]!)), fit: BoxFit.cover)
+                                          image: FileImage(
+                                            File(_photoPaths[i]!),
+                                          ),
+                                          fit: BoxFit.cover,
+                                        )
                                       : null,
                                 ),
                                 child: _photoPaths[i] == null
-                                    ? Icon(Icons.add_a_photo_rounded, size: 26, color: colors.onSurfaceVariant)
+                                    ? Icon(
+                                        Icons.add_a_photo_rounded,
+                                        size: 26,
+                                        color: colors.onSurfaceVariant,
+                                      )
                                     : null,
                               ),
                             ),
@@ -314,7 +350,11 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                                     color: Colors.black54,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.close_rounded, size: 14, color: Colors.white),
+                                  child: const Icon(
+                                    Icons.close_rounded,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
@@ -343,14 +383,19 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                   label: 'System',
                   value: _system,
                   enabled: _group != null,
-                  onTap: () => _pick(1, 'Select System', hierarchy.systems(_group!)),
+                  onTap: () =>
+                      _pick(1, 'Select System', hierarchy.systems(_group!)),
                 ),
                 _levelTile(
                   step: 3,
                   label: 'Element',
                   value: _element,
                   enabled: _system != null,
-                  onTap: () => _pick(2, 'Select Element', hierarchy.elements(_group!, _system!)),
+                  onTap: () => _pick(
+                    2,
+                    'Select Element',
+                    hierarchy.elements(_group!, _system!),
+                  ),
                 ),
                 _levelTile(
                   step: 4,
@@ -358,23 +403,43 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                   value: _subElement,
                   enabled: _element != null,
                   onTap: () => _pick(
-                      3, 'Select Sub-Element', hierarchy.subElements(_group!, _system!, _element!)),
+                    3,
+                    'Select Sub-Element',
+                    hierarchy.subElements(_group!, _system!, _element!),
+                  ),
                 ),
                 _levelTile(
                   step: 5,
                   label: 'Component',
                   value: _component,
                   enabled: _subElement != null,
-                  onTap: () => _pick(4, 'Select Component',
-                      hierarchy.components(_group!, _system!, _element!, _subElement!)),
+                  onTap: () => _pick(
+                    4,
+                    'Select Component',
+                    hierarchy.components(
+                      _group!,
+                      _system!,
+                      _element!,
+                      _subElement!,
+                    ),
+                  ),
                 ),
                 _levelTile(
                   step: 6,
                   label: 'Sub-Component',
                   value: _subComponent,
                   enabled: _component != null,
-                  onTap: () => _pick(5, 'Select Sub-Component',
-                      hierarchy.subComponents(_group!, _system!, _element!, _subElement!, _component!)),
+                  onTap: () => _pick(
+                    5,
+                    'Select Sub-Component',
+                    hierarchy.subComponents(
+                      _group!,
+                      _system!,
+                      _element!,
+                      _subElement!,
+                      _component!,
+                    ),
+                  ),
                 ),
                 if (_resolvedEntry != null)
                   Padding(
@@ -388,7 +453,10 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                       ),
                       child: Text(
                         'RSL ${_resolvedEntry!.rsl} · SFG ${_resolvedEntry!.sfgCode} · Unit ${_resolvedEntry!.unit}',
-                        style: TextStyle(fontSize: 12.5, color: colors.onPrimaryContainer),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: colors.onPrimaryContainer,
+                        ),
                       ),
                     ),
                   ),
@@ -402,8 +470,13 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
               children: [
                 TextField(
                   controller: _qtyController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Quantity', prefixIcon: Icon(Icons.tag_rounded)),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity',
+                    prefixIcon: Icon(Icons.tag_rounded),
+                  ),
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 18),
@@ -412,11 +485,13 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                 Wrap(
                   spacing: 8,
                   children: CoreSystem.values
-                      .map((v) => ChoiceChip(
-                            label: Text(v.label),
-                            selected: _coreSystem == v,
-                            onSelected: (_) => setState(() => _coreSystem = v),
-                          ))
+                      .map(
+                        (v) => ChoiceChip(
+                          label: Text(v.label),
+                          selected: _coreSystem == v,
+                          onSelected: (_) => setState(() => _coreSystem = v),
+                        ),
+                      )
                       .toList(),
                 ),
                 const SizedBox(height: 18),
@@ -425,12 +500,15 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                 Wrap(
                   spacing: 8,
                   children: ConditionRating.values
-                      .map((v) => _ColorChoiceChip(
-                            label: v.label,
-                            color: AppTheme.conditionColor(v),
-                            selected: _conditionRating == v,
-                            onSelected: () => setState(() => _conditionRating = v),
-                          ))
+                      .map(
+                        (v) => _ColorChoiceChip(
+                          label: v.label,
+                          color: AppTheme.conditionColor(v),
+                          selected: _conditionRating == v,
+                          onSelected: () =>
+                              setState(() => _conditionRating = v),
+                        ),
+                      )
                       .toList(),
                 ),
                 const SizedBox(height: 18),
@@ -439,12 +517,15 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                 Wrap(
                   spacing: 8,
                   children: ConditionPriority.values
-                      .map((v) => _ColorChoiceChip(
-                            label: v.label,
-                            color: AppTheme.priorityColor(v),
-                            selected: _conditionPriority == v,
-                            onSelected: () => setState(() => _conditionPriority = v),
-                          ))
+                      .map(
+                        (v) => _ColorChoiceChip(
+                          label: v.label,
+                          color: AppTheme.priorityColor(v),
+                          selected: _conditionPriority == v,
+                          onSelected: () =>
+                              setState(() => _conditionPriority = v),
+                        ),
+                      )
                       .toList(),
                 ),
               ],
@@ -458,7 +539,11 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
         child: FilledButton(
           onPressed: _canSave ? _save : null,
           child: _saving
-              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : Text(_isEditing ? 'Save Changes' : 'Save Component'),
         ),
       ),
@@ -471,7 +556,12 @@ class _SectionCard extends StatelessWidget {
   final String? subtitle;
   final Widget child;
   final bool padded;
-  const _SectionCard({required this.title, this.subtitle, required this.child, this.padded = true});
+  const _SectionCard({
+    required this.title,
+    this.subtitle,
+    required this.child,
+    this.padded = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -493,10 +583,22 @@ class _SectionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle!, style: TextStyle(fontSize: 12.5, color: colors.onSurfaceVariant)),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -516,9 +618,14 @@ class _ChipLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style: TextStyle(
-            fontSize: 12.5, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurfaceVariant));
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w600,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    );
   }
 }
 

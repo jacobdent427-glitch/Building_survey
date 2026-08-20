@@ -47,7 +47,8 @@ class LocalProjectStore {
     final projects = <Project>[];
     await for (final entity in dir.list()) {
       if (entity is File && entity.path.endsWith('.json')) {
-        final json = jsonDecode(await entity.readAsString()) as Map<String, dynamic>;
+        final json =
+            jsonDecode(await entity.readAsString()) as Map<String, dynamic>;
         projects.add(Project.fromJson(json));
       }
     }

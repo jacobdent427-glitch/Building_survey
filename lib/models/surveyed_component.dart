@@ -42,23 +42,24 @@ class SurveyedComponent {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'photoPaths': photoPaths,
-        'group': group,
-        'system': system,
-        'element': element,
-        'subElement': subElement,
-        'component': component,
-        'subComponent': subComponent,
-        'hierarchyIndex': hierarchyIndex,
-        'quantity': quantity,
-        'coreSystem': coreSystem.label,
-        'conditionRating': conditionRating.label,
-        'conditionPriority': conditionPriority.label,
-        'recordedAt': recordedAt.toIso8601String(),
-      };
+    'id': id,
+    'photoPaths': photoPaths,
+    'group': group,
+    'system': system,
+    'element': element,
+    'subElement': subElement,
+    'component': component,
+    'subComponent': subComponent,
+    'hierarchyIndex': hierarchyIndex,
+    'quantity': quantity,
+    'coreSystem': coreSystem.label,
+    'conditionRating': conditionRating.label,
+    'conditionPriority': conditionPriority.label,
+    'recordedAt': recordedAt.toIso8601String(),
+  };
 
-  factory SurveyedComponent.fromJson(Map<String, dynamic> json) => SurveyedComponent(
+  factory SurveyedComponent.fromJson(Map<String, dynamic> json) =>
+      SurveyedComponent(
         id: json['id'] as String,
         photoPaths: List<String>.from(json['photoPaths'] as List),
         group: json['group'] as String,
@@ -70,8 +71,12 @@ class SurveyedComponent {
         hierarchyIndex: json['hierarchyIndex'] as int,
         quantity: (json['quantity'] as num).toDouble(),
         coreSystem: CoreSystem.fromLabel(json['coreSystem'] as String),
-        conditionRating: ConditionRating.fromLabel(json['conditionRating'] as String),
-        conditionPriority: ConditionPriority.fromLabel(json['conditionPriority'] as String),
+        conditionRating: ConditionRating.fromLabel(
+          json['conditionRating'] as String,
+        ),
+        conditionPriority: ConditionPriority.fromLabel(
+          json['conditionPriority'] as String,
+        ),
         recordedAt: DateTime.parse(json['recordedAt'] as String),
       );
 }

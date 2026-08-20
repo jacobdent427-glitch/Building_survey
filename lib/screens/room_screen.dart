@@ -22,16 +22,21 @@ class RoomScreen extends StatefulWidget {
 
 class _RoomScreenState extends State<RoomScreen> {
   Future<void> _addComponent() async {
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ComponentCaptureScreen(room: widget.room),
-    ));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ComponentCaptureScreen(room: widget.room),
+      ),
+    );
     setState(() {}); // refresh the list on return
   }
 
   Future<void> _editComponent(SurveyedComponent component) async {
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ComponentCaptureScreen(room: widget.room, existing: component),
-    ));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ComponentCaptureScreen(room: widget.room, existing: component),
+      ),
+    );
     setState(() {});
   }
 
@@ -41,9 +46,13 @@ class _RoomScreenState extends State<RoomScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Component?'),
         content: Text(
-            'This removes "${component.subComponent.isNotEmpty ? component.subComponent : component.component}" from this room.'),
+          'This removes "${component.subComponent.isNotEmpty ? component.subComponent : component.component}" from this room.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(context, true),
@@ -76,7 +85,10 @@ class _RoomScreenState extends State<RoomScreen> {
                 final ratingColor = AppTheme.conditionColor(c.conditionRating);
                 return Card(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -91,7 +103,11 @@ class _RoomScreenState extends State<RoomScreen> {
                           alignment: Alignment.center,
                           child: Text(
                             c.conditionRating.label,
-                            style: TextStyle(fontWeight: FontWeight.w800, color: ratingColor, fontSize: 16),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: ratingColor,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -100,14 +116,22 @@ class _RoomScreenState extends State<RoomScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                c.subComponent.isNotEmpty ? c.subComponent : c.component,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                c.subComponent.isNotEmpty
+                                    ? c.subComponent
+                                    : c.component,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 '${c.group} › ${c.system} › ${c.element}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -119,8 +143,11 @@ class _RoomScreenState extends State<RoomScreen> {
                                   _Badge(text: 'Qty ${c.quantity}'),
                                   _Badge(text: c.coreSystem.label),
                                   _Badge(
-                                    text: 'Priority ${c.conditionPriority.label}',
-                                    color: AppTheme.priorityColor(c.conditionPriority),
+                                    text:
+                                        'Priority ${c.conditionPriority.label}',
+                                    color: AppTheme.priorityColor(
+                                      c.conditionPriority,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -138,7 +165,10 @@ class _RoomScreenState extends State<RoomScreen> {
                           },
                           itemBuilder: (context) => const [
                             PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete'),
+                            ),
                           ],
                         ),
                       ],
@@ -171,7 +201,10 @@ class _Badge extends StatelessWidget {
         color: c.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(text, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: c)),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: c),
+      ),
     );
   }
 }

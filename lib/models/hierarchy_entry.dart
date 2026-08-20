@@ -47,11 +47,32 @@ class HierarchyEntry {
 
   factory HierarchyEntry.fromCsvRow(Map<String, String> row) {
     const freqKeys = [
-      'freq_1h', 'freq_2h', 'freq_1d', 'freq_1w', 'freq_2w',
-      'freq_1m', 'freq_2m', 'freq_3m', 'freq_4m', 'freq_6m',
-      'freq_12m', 'freq_13m', 'freq_14m', 'freq_18m', 'freq_24m',
-      'freq_36m', 'freq_48m', 'freq_60m', 'freq_72m', 'freq_84m',
-      'freq_120m', 'freq_10y', 'freq_15y', 'freq_20y', 'freq_25y', 'freq_0u',
+      'freq_1h',
+      'freq_2h',
+      'freq_1d',
+      'freq_1w',
+      'freq_2w',
+      'freq_1m',
+      'freq_2m',
+      'freq_3m',
+      'freq_4m',
+      'freq_6m',
+      'freq_12m',
+      'freq_13m',
+      'freq_14m',
+      'freq_18m',
+      'freq_24m',
+      'freq_36m',
+      'freq_48m',
+      'freq_60m',
+      'freq_72m',
+      'freq_84m',
+      'freq_120m',
+      'freq_10y',
+      'freq_15y',
+      'freq_20y',
+      'freq_25y',
+      'freq_0u',
     ];
     return HierarchyEntry(
       index: int.tryParse(row['index'] ?? '') ?? 0,
@@ -77,5 +98,6 @@ class HierarchyEntry {
   /// The 6-level classification path, used to disambiguate rows that share
   /// the same text path but differ in unit/rate (this database is not
   /// perfectly unique on name alone).
-  String get pathKey => '$group|$system|$element|$subElement|$component|$subComponent';
+  String get pathKey =>
+      '$group|$system|$element|$subElement|$component|$subComponent';
 }

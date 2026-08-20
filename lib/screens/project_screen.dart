@@ -13,9 +13,14 @@ import 'building_screen.dart';
 class ProjectScreen extends StatelessWidget {
   const ProjectScreen({super.key});
 
-  Future<void> _addOrEditBuilding(BuildContext context, {Building? existing}) async {
+  Future<void> _addOrEditBuilding(
+    BuildContext context, {
+    Building? existing,
+  }) async {
     final controller = context.read<ProjectController>();
-    final refController = TextEditingController(text: existing?.reference == 'External' ? '' : existing?.reference);
+    final refController = TextEditingController(
+      text: existing?.reference == 'External' ? '' : existing?.reference,
+    );
     bool isExternal = existing?.isExternal ?? false;
 
     final result = await showDialog<bool>(
@@ -30,7 +35,9 @@ class ProjectScreen extends StatelessWidget {
               TextField(
                 controller: refController,
                 enabled: !isExternal,
-                decoration: const InputDecoration(labelText: 'Building reference'),
+                decoration: const InputDecoration(
+                  labelText: 'Building reference',
+                ),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 4),
@@ -60,10 +67,16 @@ class ProjectScreen extends StatelessWidget {
 
     if (result != true) return;
     if (existing == null) {
-      controller.addBuilding(reference: refController.text.trim(), isExternal: isExternal);
+      controller.addBuilding(
+        reference: refController.text.trim(),
+        isExternal: isExternal,
+      );
     } else {
-      controller.updateBuilding(existing,
-          reference: refController.text.trim(), isExternal: isExternal);
+      controller.updateBuilding(
+        existing,
+        reference: refController.text.trim(),
+        isExternal: isExternal,
+      );
     }
   }
 
@@ -73,9 +86,13 @@ class ProjectScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Delete Building?'),
         content: Text(
-            '"${building.reference}" and everything recorded inside it (${building.rooms.length} rooms) will be removed.'),
+          '"${building.reference}" and everything recorded inside it (${building.rooms.length} rooms) will be removed.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(context, true),
@@ -102,7 +119,9 @@ class ProjectScreen extends StatelessWidget {
     // (it's presented as a popover) - derive one from the tapped button so
     // sharing doesn't silently no-op there.
     final box = context.findRenderObject() as RenderBox?;
-    final origin = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : null;
     await exportService.exportAndShare(project, sharePositionOrigin: origin);
   }
 
@@ -142,20 +161,29 @@ class ProjectScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final Building building = project.buildings[index];
                     final roomCount = building.rooms.length;
-                    final componentCount =
-                        building.rooms.fold(0, (s, r) => s + r.components.length);
+                    final componentCount = building.rooms.fold(
+                      0,
+                      (s, r) => s + r.components.length,
+                    );
                     final colors = Theme.of(context).colorScheme;
                     return Card(
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: colors.primaryContainer,
                           child: Icon(
-                            building.isExternal ? Icons.park_rounded : Icons.apartment_rounded,
+                            building.isExternal
+                                ? Icons.park_rounded
+                                : Icons.apartment_rounded,
                             color: colors.onPrimaryContainer,
                           ),
                         ),
-                        title: Text(building.reference, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: Text('$roomCount ${roomCount == 1 ? 'room' : 'rooms'} · $componentCount components'),
+                        title: Text(
+                          building.reference,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          '$roomCount ${roomCount == 1 ? 'room' : 'rooms'} · $componentCount components',
+                        ),
                         trailing: PopupMenuButton<String>(
                           icon: const Icon(Icons.more_vert_rounded),
                           onSelected: (value) {
@@ -167,12 +195,17 @@ class ProjectScreen extends StatelessWidget {
                           },
                           itemBuilder: (context) => const [
                             PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete'),
+                            ),
                           ],
                         ),
-                        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => BuildingScreen(building: building),
-                        )),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => BuildingScreen(building: building),
+                          ),
+                        ),
                       ),
                     );
                   },

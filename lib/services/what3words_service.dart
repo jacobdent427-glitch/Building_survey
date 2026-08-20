@@ -16,10 +16,12 @@ class What3WordsService {
     if (!AppConfig.hasWhat3words || partialInput.trim().length < 3) return [];
 
     try {
-      final uri = Uri.parse(_endpoint).replace(queryParameters: {
-        'input': partialInput,
-        'key': AppConfig.what3wordsApiKey,
-      });
+      final uri = Uri.parse(_endpoint).replace(
+        queryParameters: {
+          'input': partialInput,
+          'key': AppConfig.what3wordsApiKey,
+        },
+      );
       final response = await http.get(uri).timeout(const Duration(seconds: 5));
       if (response.statusCode != 200) return [];
 
