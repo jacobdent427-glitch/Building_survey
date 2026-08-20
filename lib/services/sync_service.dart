@@ -1,24 +1,21 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as p;
 
 import '../models/project.dart';
 import 'auth_service.dart';
 import 'connectivity_service.dart';
 import 'local_project_store.dart';
 
-/// Pushes locally-saved projects up to Firestore/Storage whenever the
-/// device is online. The local store (LocalProjectStore) is always the
-/// source of truth, so the app is fully usable offline; this is a one-way
+/// Pushes locally-saved projects up to Firestore whenever the device is
+/// online. The local store (LocalProjectStore) is always the source of
+/// truth, so the app is fully usable offline; this is a one-way
 /// best-effort mirror on top of it, not a two-way sync.
 ///
-/// Photo uploads resume rather than restart: each project carries a
-/// persisted local-path -> download-URL cache (Project.photoUrlCache) that's
-/// saved to disk after every single photo upload succeeds, so if the app is
-/// killed mid-sync, the next attempt only uploads what's still missing.
+/// Photos are intentionally NOT uploaded anywhere - Firebase Cloud Storage
+/// requires the paid "Blaze" billing plan, which this project isn't on.
+/// Photos stay device-local; only survey data (site/building/room/component
+/// records) syncs to the cloud.
 class SyncService {
   final LocalProjectStore _localStore;
   final ConnectivityService _connectivity;
@@ -44,31 +41,7 @@ class SyncService {
     if (user == null) return false;
 
     try {
-      for (final building in project.buildings) {
-        for (final room in building.rooms) {
-          for (final component in room.components) {
-            for (final localPath in component.photoPaths) {
-              if (project.photoUrlCache.containsKey(localPath)) continue;
-              final file = File(localPath);
-              if (!await file.exists()) continue;
-
-              final ref = FirebaseStorage.instance.ref(
-                  'projects/${project.id}/photos/${p.basename(localPath)}');
-              await ref.putFile(file);
-              final url = await ref.getDownloadURL();
-
-              // Persist immediately: if the app is killed before the
-              // project document write below, this upload still won't be
-              // redone on the next attempt.
-              project.photoUrlCache[localPath] = url;
-              await _localStore.save(project);
-            }
-          }
-        }
-      }
-
       final cloudJson = project.toJson();
-      _replacePhotoPaths(cloudJson, project.photoUrlCache);
       cloudJson['uploadedByUid'] = user.uid;
 
       await FirebaseFirestore.instance
@@ -84,18 +57,6 @@ class SyncService {
     }
   }
 
-  void _replacePhotoPaths(Map<String, dynamic> json, Map<String, String> urlCache) {
-    for (final building in json['buildings'] as List) {
-      for (final room in (building as Map<String, dynamic>)['rooms'] as List) {
-        for (final component in (room as Map<String, dynamic>)['components'] as List) {
-          final paths = (component as Map<String, dynamic>)['photoPaths'] as List;
-          component['photoPaths'] =
-              paths.map((path) => urlCache[path] ?? path).toList();
-        }
-      }
-    }
-  }
-
   Future<void> syncAllUnsyncedProjects() async {
     final projects = await _localStore.listAll();
     for (final project in projects.where((p) => !p.synced)) {
@@ -104,9 +65,8 @@ class SyncService {
   }
 
   /// Retries every unsynced project as soon as connectivity is available:
-  /// once immediately (covers "was offline when the app started, or was
-  /// killed mid-upload last session"), then again every time the device
-  /// transitions from offline to online.
+  /// once immediately (covers "was offline when the app started"), then
+  /// again every time the device transitions from offline to online.
   void startAutoRetry() {
     unawaited(syncAllUnsyncedProjects());
     _autoRetrySubscription?.cancel();

@@ -9,16 +9,20 @@ A Flutter app for on-site building condition surveys, matching the workflow from
    saved one.
 2. **New project** — site reference and address.
 3. **Buildings** — add a building reference, or mark the location as "External".
-4. **Rooms** — add a room reference and (optionally) a what3words location.
+   Edit or delete any building from its list entry.
+4. **Rooms** — add a room reference, floor, and (optionally) a what3words
+   location. Edit or delete any room from its list entry.
 5. **Components** — for each component: take 3 reference photos, then search the
    maintenance hierarchy database (Group -> System -> Element -> Sub-Element ->
    Component -> Sub-Component), then record quantity, core/non-core, condition
    rating (A-D) and priority (1-4). RSL, SFG code, rate, and every maintenance
    frequency column are looked up automatically from the matched database row —
-   they're never shown in the app, only in the export.
+   they're never shown in the app, only in the export. Edit or delete any
+   component from its list entry (editing reopens the same capture screen,
+   pre-filled).
 6. **Export** — from the project screen, "Export CSV" builds a CSV (one row per
-   surveyed component, in the same column layout as `app rough output.xlsx`) and
-   opens the phone's native share sheet.
+   surveyed component, in the same column layout as `app rough output.xlsx`,
+   floor column included) and opens the phone's native share sheet.
 
 ## Architecture (`lib/`)
 
@@ -30,8 +34,9 @@ A Flutter app for on-site building condition surveys, matching the workflow from
   persistence — the source of truth), `SyncService` (best-effort push to
   Firebase when online), `PhotoService`, `CsvExportService`,
   `What3WordsService`, `ConnectivityService`, `AuthService`.
-- `state/project_controller.dart` — the one place the UI mutates project data;
-  every change auto-saves locally and attempts a background cloud sync.
+- `state/project_controller.dart` — the one place the UI mutates project data
+  (add/edit/delete building, room, component); every change auto-saves
+  locally and attempts a background cloud sync.
 - `screens/` and `widgets/` — one screen per step of the workflow above.
 
 The app is **offline-first**: every survey action is saved to the device
@@ -69,11 +74,44 @@ only adds live autosuggest on top when the device is online.
 
 Configured for Android via `android/app/google-services.json`
 (project: `building-surveying-app`, package: `com.Eddisons.building_survey`).
-Firestore holds one document per project under the `projects` collection;
-photos are uploaded to Cloud Storage under `projects/{projectId}/photos/`.
-Surveyors sign in anonymously in the background (Firebase Auth) purely so
-Firestore/Storage security rules can require "signed in" — there is no
-login screen; the surveyor ID field is just data.
+Firestore holds one document per project (all its buildings/rooms/components)
+under the `projects` collection. Surveyors sign in anonymously in the
+background (Firebase Auth) purely so Firestore security rules can require
+"signed in" — there is no login screen; the surveyor ID field is just data.
+
+**Photos are not uploaded to the cloud** — Firebase Cloud Storage requires
+the paid "Blaze" billing plan (a card on file), which this project isn't on.
+Photos stay device-local; they're still captured, shown in the app, and
+included in the CSV export by filename, they just don't sync across devices.
+If you later add Blaze, re-introducing Storage upload is a small, contained
+change to `SyncService` (git history has the previous implementation).
+Because there's no photo upload step, sync is now a single atomic Firestore
+write per save — there's no partial-upload state to get stuck in if the app
+closes mid-sync; the next save (or automatic connectivity-triggered retry)
+just re-sends the whole project.
+
+**Before sync will actually work**, open the Firebase console for
+`building-surveying-app` and set Firestore rules to allow the app's
+anonymous-auth users to read/write (Console > Firestore Database > Rules):
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+A fresh Firestore instance defaults to denying all access, so until this is
+set, `SyncService` will fail silently and every project will just stay in
+local-only mode (the app still works fine — sync is best-effort).
+
+Also enable **Anonymous** sign-in under Console > Authentication > Sign-in
+method — it's off by default on a new project, and `AuthService` needs it
+to sign the surveyor's device in.
 
 ## iOS (no Mac needed to build or install, but read this first)
 
@@ -103,7 +141,7 @@ an hourly rental like MacinCloud) just to generate a certificate/profile —
 after that, Codemagic can reuse it for every future build.
 
 Steps once you're ready:
-1. Push this repo to GitHub (see below).
+1. Push this repo to GitHub (already done if you're reading this from there).
 2. Create a free Codemagic account, connect it to the repo — it will detect
    `codemagic.yaml` automatically.
 3. In Codemagic's UI, set up iOS code signing (Team settings > Code signing
@@ -117,49 +155,13 @@ Steps once you're ready:
 6. Free Apple ID installs expire after 7 days and need re-installing via
    Sideloadly; a paid Developer Program account doesn't have that limit.
 
-**Before sync will actually work**, open the Firebase console for
-`building-surveying-app` and set Firestore + Storage rules to allow the
-app's anonymous-auth users to read/write (Console > Firestore Database >
-Rules, and Console > Storage > Rules):
-
-```
-// Firestore
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /projects/{projectId} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
-```
-
-```
-// Storage
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /projects/{projectId}/photos/{photoId} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
-```
-
-A fresh Firestore/Storage instance defaults to denying all access, so until
-these are set, `SyncService` will fail silently and every project will just
-stay in local-only mode (the app still works fine — sync is best-effort).
-
-Also enable **Anonymous** sign-in under Console > Authentication > Sign-in
-method — it's off by default on a new project, and `AuthService` needs it
-to sign the surveyor's device in.
-
 ## Known limitations / next steps
 
-- The "floor" column in the CSV export template has no corresponding input
-  in the app yet (not part of the described workflow) — it exports blank.
-- No edit/delete for a component once saved, or for buildings/rooms — only
-  additive entry, matching the described "keep putting in components" flow.
-- Firebase Storage uploads are not resumed automatically if the app is
-  closed mid-upload; the next `saveNow()` / mutation will retry the whole
-  project's sync.
+- Deleting a building/room/component removes it locally and from the next
+  Firestore sync, but doesn't retroactively scrub older synced copies of
+  data you may have already pulled elsewhere - there's no cross-device
+  merge, just last-write-wins per project.
+- No offline queueing of Firebase Auth's anonymous sign-in itself - if the
+  very first sync attempt happens while offline, sign-in (and therefore
+  sync) is skipped for that attempt and retried on the next connectivity
+  change or save, same as everything else in `SyncService`.

@@ -13,12 +13,6 @@ class Project {
   /// True once every change in this project has been pushed to the cloud.
   bool synced;
 
-  /// Local photo path -> Firebase Storage download URL, for photos already
-  /// uploaded by a previous sync attempt. Lets SyncService resume where it
-  /// left off (skip re-uploading) instead of starting over if the app is
-  /// closed mid-upload.
-  final Map<String, String> photoUrlCache;
-
   Project({
     required this.id,
     required this.siteRef,
@@ -27,9 +21,7 @@ class Project {
     required this.createdAt,
     List<Building>? buildings,
     this.synced = false,
-    Map<String, String>? photoUrlCache,
-  })  : buildings = buildings ?? [],
-        photoUrlCache = photoUrlCache ?? {};
+  }) : buildings = buildings ?? [];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -39,7 +31,6 @@ class Project {
         'createdAt': createdAt.toIso8601String(),
         'buildings': buildings.map((b) => b.toJson()).toList(),
         'synced': synced,
-        'photoUrlCache': photoUrlCache,
       };
 
   factory Project.fromJson(Map<String, dynamic> json) => Project(
@@ -52,9 +43,6 @@ class Project {
             .map((b) => Building.fromJson(b as Map<String, dynamic>))
             .toList(),
         synced: json['synced'] as bool? ?? false,
-        photoUrlCache: (json['photoUrlCache'] as Map<String, dynamic>?)
-                ?.map((k, v) => MapEntry(k, v as String)) ??
-            {},
       );
 
   int get componentCount =>

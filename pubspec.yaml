@@ -32,10 +32,9 @@ dependencies:
   # what3words location lookup
   http: ^1.2.2
 
-  # cloud sync backend
+  # cloud sync backend (Firestore only - Storage needs the paid Blaze plan)
   firebase_core: ^3.8.0
   cloud_firestore: ^5.5.0
-  firebase_storage: ^12.3.7
   firebase_auth: ^5.3.3
 
 dev_dependencies:
