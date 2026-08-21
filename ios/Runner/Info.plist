@@ -30,6 +30,8 @@
 	<string>Used to take the reference photos recorded against each surveyed component.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Used to save survey photos taken during a component capture.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used to look up the what3words address of your current location for a room.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

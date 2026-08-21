@@ -7,6 +7,7 @@ import 'services/connectivity_service.dart';
 import 'services/csv_export_service.dart';
 import 'services/hierarchy_repository.dart';
 import 'services/local_project_store.dart';
+import 'services/location_service.dart';
 import 'services/photo_service.dart';
 import 'services/sync_service.dart';
 import 'services/what3words_service.dart';
@@ -59,6 +60,7 @@ class BuildingSurveyApp extends StatelessWidget {
         Provider<PhotoService>(create: (_) => PhotoService(localStore)),
         Provider<CsvExportService>(create: (_) => CsvExportService(hierarchy)),
         Provider<What3WordsService>(create: (_) => What3WordsService()),
+        Provider<LocationService>(create: (_) => LocationService()),
         ChangeNotifierProvider<ProjectController>(
           create: (_) => ProjectController(localStore, sync),
         ),

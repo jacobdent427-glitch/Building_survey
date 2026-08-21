@@ -38,20 +38,26 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
 
   bool get _canContinue => _surveyorIdController.text.trim().isNotEmpty;
 
-  void _startNewProject() {
-    Navigator.of(context).push(
+  Future<void> _startNewProject() async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) =>
             NewProjectScreen(surveyorId: _surveyorIdController.text.trim()),
       ),
     );
+    // The project list on this screen was only loaded once, in initState -
+    // refresh it now that we're back, or a newly-created project stays
+    // invisible here until the app is force-closed and reopened.
+    if (mounted) await _loadProjects();
   }
 
   Future<void> _openProject(Project project) async {
     await context.read<ProjectController>().openProject(project);
     if (!mounted) return;
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => const ProjectScreen()));
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProjectScreen()));
+    if (mounted) await _loadProjects();
   }
 
   @override
@@ -62,20 +68,6 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: colors.primaryContainer,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(
-                Icons.domain_verification_rounded,
-                color: colors.onPrimaryContainer,
-                size: 34,
-              ),
-            ),
-            const SizedBox(height: 20),
             Text(
               'Building Survey',
               style: Theme.of(context).textTheme.headlineMedium
@@ -142,12 +134,11 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
             else if (_existingProjects.isEmpty)
               _EmptyProjectsHint(colors: colors)
             else
+              // Opening a saved project doesn't need a surveyor ID typed in -
+              // the project already has one from when it was created.
               ..._existingProjects.map(
-                (project) => _ProjectTile(
-                  project: project,
-                  enabled: _canContinue,
-                  onTap: () => _openProject(project),
-                ),
+                (project) =>
+                    _ProjectTile(project: project, onTap: () => _openProject(project)),
               ),
           ],
         ),
@@ -189,13 +180,8 @@ class _EmptyProjectsHint extends StatelessWidget {
 
 class _ProjectTile extends StatelessWidget {
   final Project project;
-  final bool enabled;
   final VoidCallback onTap;
-  const _ProjectTile({
-    required this.project,
-    required this.enabled,
-    required this.onTap,
-  });
+  const _ProjectTile({required this.project, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -203,8 +189,7 @@ class _ProjectTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        onTap: enabled ? onTap : null,
-        enabled: enabled,
+        onTap: onTap,
         leading: CircleAvatar(
           backgroundColor: colors.primaryContainer,
           child: Icon(

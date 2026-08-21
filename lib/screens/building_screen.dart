@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/building.dart';
 import '../models/room.dart';
+import '../services/location_service.dart';
 import '../services/what3words_service.dart';
 import '../state/project_controller.dart';
 import '../widgets/empty_state.dart';
@@ -17,74 +18,121 @@ class BuildingScreen extends StatelessWidget {
   Future<void> _addOrEditRoom(BuildContext context, {Room? existing}) async {
     final controller = context.read<ProjectController>();
     final w3wService = context.read<What3WordsService>();
+    final locationService = context.read<LocationService>();
     final refController = TextEditingController(text: existing?.reference);
     final floorController = TextEditingController(text: existing?.floor);
     final w3wController = TextEditingController(text: existing?.what3words);
     List<String> suggestions = [];
+    bool locating = false;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(existing == null ? 'Add Room' : 'Edit Room'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: refController,
-                  decoration: const InputDecoration(
-                    labelText: 'Room reference',
+        builder: (context, setState) {
+          Future<void> useCurrentLocation() async {
+            setState(() {
+              locating = true;
+              suggestions = [];
+            });
+            try {
+              final position = await locationService.currentPosition();
+              final words = await w3wService.wordsForCoordinates(
+                position.latitude,
+                position.longitude,
+              );
+              w3wController.text = words;
+            } on LocationException catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(e.message)));
+              }
+            } on What3WordsException catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(e.message)));
+              }
+            } finally {
+              if (context.mounted) setState(() => locating = false);
+            }
+          }
+
+          return AlertDialog(
+            title: Text(existing == null ? 'Add Room' : 'Edit Room'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: refController,
+                    decoration: const InputDecoration(
+                      labelText: 'Room reference',
+                    ),
+                    onChanged: (_) => setState(() {}),
                   ),
-                  onChanged: (_) => setState(() {}),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: floorController,
-                  decoration: const InputDecoration(
-                    labelText: 'Floor (optional)',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: w3wController,
-                  decoration: const InputDecoration(
-                    labelText: 'what3words (optional)',
-                    hintText: 'e.g. filled.count.soap',
-                  ),
-                  onChanged: (value) async {
-                    final s = await w3wService.suggest(value);
-                    setState(() => suggestions = s);
-                  },
-                ),
-                if (suggestions.isNotEmpty)
-                  ...suggestions.map(
-                    (s) => ListTile(
-                      dense: true,
-                      title: Text(s),
-                      onTap: () {
-                        w3wController.text = s;
-                        setState(() => suggestions = []);
-                      },
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: floorController,
+                    decoration: const InputDecoration(
+                      labelText: 'Floor (optional)',
                     ),
                   ),
-              ],
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: w3wController,
+                    decoration: InputDecoration(
+                      labelText: 'what3words (optional)',
+                      hintText: 'e.g. filled.count.soap',
+                      suffixIcon: locating
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.my_location_rounded),
+                              tooltip: 'Use my current location',
+                              onPressed: useCurrentLocation,
+                            ),
+                    ),
+                    onChanged: (value) async {
+                      final s = await w3wService.suggest(value);
+                      setState(() => suggestions = s);
+                    },
+                  ),
+                  if (suggestions.isNotEmpty)
+                    ...suggestions.map(
+                      (s) => ListTile(
+                        dense: true,
+                        title: Text(s),
+                        onTap: () {
+                          w3wController.text = s;
+                          setState(() => suggestions = []);
+                        },
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: refController.text.trim().isNotEmpty
-                  ? () => Navigator.pop(context, true)
-                  : null,
-              child: Text(existing == null ? 'Add' : 'Save'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: refController.text.trim().isNotEmpty
+                    ? () => Navigator.pop(context, true)
+                    : null,
+                child: Text(existing == null ? 'Add' : 'Save'),
+              ),
+            ],
+          );
+        },
       ),
     );
 

@@ -125,6 +125,17 @@ class ProjectScreen extends StatelessWidget {
     await exportService.exportAndShare(project, sharePositionOrigin: origin);
   }
 
+  Future<void> _save(BuildContext context) async {
+    // Every mutation already auto-saves; this button mainly exists to give
+    // the surveyor visible reassurance that their work is safe, since
+    // otherwise tapping it produced no feedback at all.
+    await context.read<ProjectController>().saveNow();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Project saved'), duration: Duration(seconds: 1)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ProjectController>(
@@ -145,7 +156,7 @@ class ProjectScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.save_outlined),
                 tooltip: 'Save',
-                onPressed: () => controller.saveNow(),
+                onPressed: () => _save(context),
               ),
               const SizedBox(width: 4),
             ],

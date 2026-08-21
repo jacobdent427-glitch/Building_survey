@@ -31,6 +31,7 @@ dependencies:
 
   # what3words location lookup
   http: ^1.2.2
+  geolocator: ^13.0.2
 
   # cloud sync backend (Firestore only - Storage needs the paid Blaze plan)
   firebase_core: ^3.8.0
