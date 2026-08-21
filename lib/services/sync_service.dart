@@ -57,6 +57,19 @@ class SyncService {
     }
   }
 
+  /// Best-effort removal of the cloud copy of a project. Failures (offline,
+  /// not configured, never synced in the first place) are swallowed - the
+  /// local delete is what actually matters and always succeeds regardless.
+  Future<void> deleteProject(String projectId) async {
+    if (!isConfigured) return;
+    if (!await _connectivity.isOnline()) return;
+    try {
+      await FirebaseFirestore.instance.collection('projects').doc(projectId).delete();
+    } catch (_) {
+      // Nothing to do - the local copy is already gone, which is what matters.
+    }
+  }
+
   Future<void> syncAllUnsyncedProjects() async {
     final projects = await _localStore.listAll();
     for (final project in projects.where((p) => !p.synced)) {

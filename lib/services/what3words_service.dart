@@ -66,7 +66,7 @@ class What3WordsService {
     }
 
     if (response.statusCode != 200) {
-      throw What3WordsException('what3words lookup failed (HTTP ${response.statusCode}).');
+      throw What3WordsException(_describeError(response));
     }
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -75,5 +75,31 @@ class What3WordsService {
       throw What3WordsException('what3words did not return an address for this location.');
     }
     return words;
+  }
+
+  /// Turns a non-200 response into a message that explains what actually
+  /// went wrong, using what3words' own error body
+  /// (`{"error": {"code": ..., "message": ...}}`) when present. HTTP 402
+  /// specifically means the API key has exceeded its plan's request quota -
+  /// that's an account/billing issue on what3words' side, not something the
+  /// app itself can retry its way out of.
+  String _describeError(http.Response response) {
+    String? apiMessage;
+    try {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      apiMessage = (body['error'] as Map<String, dynamic>?)?['message'] as String?;
+    } catch (_) {
+      // Response body wasn't JSON, or didn't have the expected shape.
+    }
+
+    if (response.statusCode == 402) {
+      return apiMessage != null
+          ? 'what3words: $apiMessage - this API key has hit its usage quota. Check the plan at what3words.com/select-plan.'
+          : 'This what3words API key has hit its usage quota (HTTP 402). Check the plan at what3words.com/select-plan.';
+    }
+
+    return apiMessage != null
+        ? 'what3words: $apiMessage'
+        : 'what3words lookup failed (HTTP ${response.statusCode}).';
   }
 }

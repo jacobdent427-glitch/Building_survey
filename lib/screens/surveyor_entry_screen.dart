@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/project.dart';
 import '../services/local_project_store.dart';
+import '../services/sync_service.dart';
 import '../state/project_controller.dart';
 import 'new_project_screen.dart';
 import 'project_screen.dart';
@@ -57,6 +60,39 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
     await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const ProjectScreen()));
+    if (mounted) await _loadProjects();
+  }
+
+  Future<void> _confirmDeleteProject(Project project) async {
+    final localStore = context.read<LocalProjectStore>();
+    final sync = context.read<SyncService>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Project?'),
+        content: Text(
+          '"${project.siteRef}" and everything recorded in it (${project.componentCount} components) will be permanently removed from this device.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    await localStore.delete(project.id);
+    // Best-effort: also remove the cloud copy if one exists. Doesn't block
+    // the local delete, which is what actually matters.
+    unawaited(sync.deleteProject(project.id));
     if (mounted) await _loadProjects();
   }
 
@@ -137,8 +173,11 @@ class _SurveyorEntryScreenState extends State<SurveyorEntryScreen> {
               // Opening a saved project doesn't need a surveyor ID typed in -
               // the project already has one from when it was created.
               ..._existingProjects.map(
-                (project) =>
-                    _ProjectTile(project: project, onTap: () => _openProject(project)),
+                (project) => _ProjectTile(
+                  project: project,
+                  onTap: () => _openProject(project),
+                  onDelete: () => _confirmDeleteProject(project),
+                ),
               ),
           ],
         ),
@@ -181,7 +220,12 @@ class _EmptyProjectsHint extends StatelessWidget {
 class _ProjectTile extends StatelessWidget {
   final Project project;
   final VoidCallback onTap;
-  const _ProjectTile({required this.project, required this.onTap});
+  final VoidCallback onDelete;
+  const _ProjectTile({
+    required this.project,
+    required this.onTap,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -205,11 +249,21 @@ class _ProjectTile extends StatelessWidget {
           '${project.siteAddress}\n${project.componentCount} components recorded',
         ),
         isThreeLine: true,
-        trailing: Icon(
-          project.synced ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
-          color: project.synced
-              ? const Color(0xFF2E7D32)
-              : colors.onSurfaceVariant,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              project.synced ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+              color: project.synced
+                  ? const Color(0xFF2E7D32)
+                  : colors.onSurfaceVariant,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded),
+              tooltip: 'Delete project',
+              onPressed: onDelete,
+            ),
+          ],
         ),
       ),
     );
