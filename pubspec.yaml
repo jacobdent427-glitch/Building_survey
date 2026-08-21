@@ -19,6 +19,7 @@ dependencies:
   # ids, csv, sharing, files
   uuid: ^4.5.1
   csv: ^6.0.0
+  archive: ^3.6.1
   share_plus: ^10.1.4
   path_provider: ^2.1.5
   path: ^1.9.0

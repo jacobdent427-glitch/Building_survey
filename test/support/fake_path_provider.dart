@@ -11,6 +11,9 @@ class FakePathProviderPlatform extends PathProviderPlatform {
 
   @override
   Future<String?> getApplicationDocumentsPath() async => root.path;
+
+  @override
+  Future<String?> getTemporaryPath() async => root.path;
 }
 
 /// Installs a fake path_provider backed by a fresh temp directory and

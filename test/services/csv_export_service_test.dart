@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:building_survey_app/models/building.dart';
 import 'package:building_survey_app/models/condition.dart';
@@ -8,6 +12,8 @@ import 'package:building_survey_app/models/room.dart';
 import 'package:building_survey_app/models/surveyed_component.dart';
 import 'package:building_survey_app/services/csv_export_service.dart';
 import 'package:building_survey_app/services/hierarchy_repository.dart';
+
+import '../support/fake_path_provider.dart';
 
 SurveyedComponent _componentFor(HierarchyEntry entry, {String id = 'c1'}) =>
     SurveyedComponent(
@@ -143,8 +149,13 @@ void main() {
     expect(row[2], 'Block A'); // building ref
     expect(row[3], '2nd Floor'); // floor
     expect(row[4], 'Room 1'); // room
-    expect(row[5], 'a.jpg'); // photo 1 ref (basename only)
-    expect(row[6], 'b.jpg'); // photo 2 ref
+    // Photo refs are readable + guaranteed-unique names derived from
+    // building/room/component/index/component-id, not the original photo
+    // filename (which is a meaningless local UUID) - see _photoExportName.
+    expect(row[5], contains('Block-A'));
+    expect(row[5], contains('Room-1'));
+    expect(row[5], endsWith('_1_c1.jpg')); // photo index 1, component id c1
+    expect(row[6], endsWith('_2_c1.jpg')); // photo index 2, same component
     expect(row[7], ''); // photo 3 ref - only 2 photos given
     expect(row[8], entry.group);
     expect(row[13], entry.subComponent);
@@ -243,5 +254,95 @@ void main() {
     final rows = CsvExportService(hierarchy).buildRows(project);
     expect(rows[1][18], ''); // RSL blank
     expect(rows[1][19], ''); // SFG code blank
+  });
+
+  group('writePhotosZipToTempFile', () {
+    late Directory tempRoot;
+
+    setUp(() {
+      tempRoot = installFakePathProvider();
+    });
+
+    tearDown(() {
+      if (tempRoot.existsSync()) tempRoot.deleteSync(recursive: true);
+    });
+
+    test('returns null when the project has no photos on disk', () async {
+      final entry = hierarchy.entryByIndex(1);
+      final component = SurveyedComponent(
+        id: 'c1',
+        photoPaths: const [],
+        group: entry.group,
+        system: entry.system,
+        element: entry.element,
+        subElement: entry.subElement,
+        component: entry.component,
+        subComponent: entry.subComponent,
+        hierarchyIndex: entry.index,
+        quantity: 1,
+        coreSystem: CoreSystem.core,
+        conditionRating: ConditionRating.a,
+        conditionPriority: ConditionPriority.p1,
+        recordedAt: DateTime.utc(2026, 1, 1),
+      );
+      final room = Room(id: 'r1', reference: 'Room 1', components: [component]);
+      final building = Building(id: 'b1', reference: 'Block A', rooms: [room]);
+      final project = Project(
+        id: 'p1',
+        siteRef: 'S',
+        siteAddress: 'A',
+        surveyorId: 'JD',
+        createdAt: DateTime.utc(2026, 1, 1),
+        buildings: [building],
+      );
+
+      final zip = await CsvExportService(hierarchy).writePhotosZipToTempFile(project);
+      expect(zip, isNull);
+    });
+
+    test('zips real photo files under exactly the names used in the CSV', () async {
+      final photo1 = File(p.join(tempRoot.path, 'raw1.jpg'))..writeAsBytesSync([1, 2, 3]);
+      final photo2 = File(p.join(tempRoot.path, 'raw2.jpg'))..writeAsBytesSync([4, 5, 6]);
+
+      final entry = hierarchy.entryByIndex(1);
+      final component = SurveyedComponent(
+        id: 'c1',
+        photoPaths: [photo1.path, photo2.path],
+        group: entry.group,
+        system: entry.system,
+        element: entry.element,
+        subElement: entry.subElement,
+        component: entry.component,
+        subComponent: entry.subComponent,
+        hierarchyIndex: entry.index,
+        quantity: 1,
+        coreSystem: CoreSystem.core,
+        conditionRating: ConditionRating.a,
+        conditionPriority: ConditionPriority.p1,
+        recordedAt: DateTime.utc(2026, 1, 1),
+      );
+      final room = Room(id: 'r1', reference: 'Room 1', components: [component]);
+      final building = Building(id: 'b1', reference: 'Block A', rooms: [room]);
+      final project = Project(
+        id: 'p1',
+        siteRef: 'S',
+        siteAddress: 'A',
+        surveyorId: 'JD',
+        createdAt: DateTime.utc(2026, 1, 1),
+        buildings: [building],
+      );
+
+      final service = CsvExportService(hierarchy);
+      final rows = service.buildRows(project);
+      final expectedNames = {rows[1][5] as String, rows[1][6] as String};
+
+      final zipFile = await service.writePhotosZipToTempFile(project);
+      expect(zipFile, isNotNull);
+
+      final archive = ZipDecoder().decodeBytes(await zipFile!.readAsBytes());
+      final namesInZip = archive.files.map((f) => f.name).toSet();
+
+      expect(namesInZip, expectedNames);
+    });
   });
 }
