@@ -488,11 +488,17 @@ class _ComponentCaptureScreenState extends State<ComponentCaptureScreen> {
                       .map(
                         (v) => ChoiceChip(
                           label: Text(v.label),
+                          labelStyle: const TextStyle(
+                            color: Colors.black,
+                          ),
                           selected: _coreSystem == v,
+                          selectedColor: Colors.grey[300],
+                          backgroundColor: Colors.white,
                           onSelected: (_) => setState(() => _coreSystem = v),
                         ),
                       )
                       .toList(),
+                ),
                 ),
                 const SizedBox(height: 18),
                 _ChipLabel('Condition rating (A best · D worst)'),
